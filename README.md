@@ -1,0 +1,4 @@
+fcrn
+====
+
+Yii currency module
