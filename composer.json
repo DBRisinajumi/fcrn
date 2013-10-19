@@ -1,5 +1,5 @@
 {
-    "name": "dbrisinajumi/fcrn",
+    "name": "dbrisinajumi.fcrn",
     "description": "currency module",
     "keywords": ["currency","yii","phundament"],
     "type": "yii-extension",

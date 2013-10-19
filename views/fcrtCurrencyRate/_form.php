@@ -1,6 +1,6 @@
 <div class="">
     <p class="alert">
-        <?php echo Yii::t('dbrisinajumi.fcrn','Fields with <span class="required">*</span> are required.');?> 
+        <?php echo Yii::t('FcrnModule.crud_static','Fields with <span class="required">*</span> are required.');?> 
     </p>
 
 
@@ -43,7 +43,7 @@
 							 );
 					; ?>
             <?php echo $form->error($model,'fcrt_date'); ?>
-            <?php if('help.fcrt_date' != $help = Yii::t('dbrisinajumi.fcrn', 'help.fcrt_date')) { 
+            <?php if('help.fcrt_date' != $help = Yii::t('FcrnModule.crud', 'help.fcrt_date')) { 
                 echo "<span class='help-block'>{$help}</span>";            
 } ?>
         </div>
@@ -55,7 +55,7 @@
             <?php echo $form->labelEx($model,'fcrt_rate'); ?>
             <?php echo $form->textField($model,'fcrt_rate'); ?>
             <?php echo $form->error($model,'fcrt_rate'); ?>
-            <?php if('help.fcrt_rate' != $help = Yii::t('dbrisinajumi.fcrn', 'help.fcrt_rate')) { 
+            <?php if('help.fcrt_rate' != $help = Yii::t('FcrnModule.crud', 'help.fcrt_rate')) { 
                 echo "<span class='help-block'>{$help}</span>";            
 } ?>
         </div>
@@ -63,7 +63,7 @@
 
     <div class="row-fluid input-block-level-container">
         <div class="span12">
-        <label for="fcrtFcrn"><?php echo Yii::t('dbrisinajumi.fcrn', 'FcrtFcrn'); ?></label>
+        <label for="fcrtFcrn"><?php echo Yii::t('FcrnModule.crud', 'FcrtFcrn'); ?></label>
                 <?php
                 $this->widget(
 					'Relation',
@@ -93,11 +93,11 @@
     <div class="form-actions">
         
     <?php
-        echo CHtml::Button(Yii::t('dbrisinajumi.fcrn', 'Cancel'), array(
+        echo CHtml::Button(Yii::t('FcrnModule.crud_static', 'Cancel'), array(
 			'submit' => (isset($_GET['returnUrl']))?$_GET['returnUrl']:array('fcrtcurrencyrate/admin'),
 			'class' => 'btn'
 			));
-        echo ' '.CHtml::submitButton(Yii::t('dbrisinajumi.fcrn', 'Save'), array(
+        echo ' '.CHtml::submitButton(Yii::t('FcrnModule.crud_static', 'Save'), array(
             'class' => 'btn btn-primary'
             ));
     ?>

@@ -1,6 +1,6 @@
 <div class="">
     <p class="alert">
-        <?php echo Yii::t('dbrisinajumi.fcrn','Fields with <span class="required">*</span> are required.');?> 
+        <?php echo Yii::t('FcrnModule.crud_static','Fields with <span class="required">*</span> are required.');?> 
     </p>
 
 
@@ -29,7 +29,7 @@
 
             <?php echo $form->textField($model,'fcrn_code',array('size'=>3,'maxlength'=>3)); ?>
             <?php echo $form->error($model,'fcrn_code'); ?>
-            <?php if('help.fcrn_code' != $help = Yii::t('dbrisinajumi.fcrn', 'help.fcrn_code')) { 
+            <?php if('help.fcrn_code' != $help = Yii::t('FcrnModule.crud', 'help.fcrn_code')) { 
                 echo "<span class='help-block'>{$help}</span>";            
 } ?>
         </div>
@@ -41,7 +41,7 @@
             <?php echo $form->labelEx($model,'fcrn_hide'); ?>
             <?php echo $form->textField($model,'fcrn_hide'); ?>
             <?php echo $form->error($model,'fcrn_hide'); ?>
-            <?php if('help.fcrn_hide' != $help = Yii::t('dbrisinajumi.fcrn', 'help.fcrn_hide')) { 
+            <?php if('help.fcrn_hide' != $help = Yii::t('FcrnModule.crud', 'help.fcrn_hide')) { 
                 echo "<span class='help-block'>{$help}</span>";            
 } ?>
         </div>
@@ -59,11 +59,11 @@
     <div class="form-actions">
         
     <?php
-        echo CHtml::Button(Yii::t('dbrisinajumi.fcrn', 'Cancel'), array(
+        echo CHtml::Button(Yii::t('FcrnModule.crud_static', 'Cancel'), array(
 			'submit' => (isset($_GET['returnUrl']))?$_GET['returnUrl']:array('fcrncurrency/admin'),
 			'class' => 'btn'
 			));
-        echo ' '.CHtml::submitButton(Yii::t('dbrisinajumi.fcrn', 'Save'), array(
+        echo ' '.CHtml::submitButton(Yii::t('FcrnModule.crud_static', 'Save'), array(
             'class' => 'btn btn-primary'
             ));
     ?>

@@ -40,7 +40,7 @@ abstract class BaseFcrtCurrencyRate extends CActiveRecord{
 		return array_merge(
 		    parent::behaviors(), array(
 			'savedRelated' => array(
-				'class' => 'gii-template-collection.components.CSaveRelationsBehavior'
+				'class' => '\GtcSaveRelationsBehavior'
 			)
 		    )
 		);
@@ -56,10 +56,10 @@ abstract class BaseFcrtCurrencyRate extends CActiveRecord{
 	public function attributeLabels()
 	{
 		return array(
-			'fcrt_id' => Yii::t('dbrisinajumi.fcrn', 'Fcrt'),
-			'fcrt_fcrn_id' => Yii::t('dbrisinajumi.fcrn', 'Fcrt Fcrn'),
-			'fcrt_date' => Yii::t('dbrisinajumi.fcrn', 'Fcrt Date'),
-			'fcrt_rate' => Yii::t('dbrisinajumi.fcrn', 'Fcrt Rate'),
+			'fcrt_id' => Yii::t('FcrnModule.crud', 'Fcrt'),
+			'fcrt_fcrn_id' => Yii::t('FcrnModule.crud', 'Fcrt Fcrn'),
+			'fcrt_date' => Yii::t('FcrnModule.crud', 'Fcrt Date'),
+			'fcrt_rate' => Yii::t('FcrnModule.crud', 'Fcrt Rate'),
 		);
 	}
 

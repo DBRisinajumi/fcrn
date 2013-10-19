@@ -132,7 +132,7 @@ public function accessRules() {
             }
         }
         else
-            throw new CHttpException(400,Yii::t('dbrisinajumi.fcrn', 'Invalid request. Please do not repeat this request again.'));
+            throw new CHttpException(400,Yii::t('FcrnModule.crud_static', 'Invalid request. Please do not repeat this request again.'));
     }
 
     public function actionIndex()
@@ -157,7 +157,7 @@ public function accessRules() {
     {
         $model=FcrnCurrency::model()->findByPk($id);
         if($model===null)
-            throw new CHttpException(404,Yii::t('dbrisinajumi.fcrn', 'The requested page does not exist.'));
+            throw new CHttpException(404,Yii::t('FcrnModule.crud_static', 'The requested page does not exist.'));
         return $model;
     }
 

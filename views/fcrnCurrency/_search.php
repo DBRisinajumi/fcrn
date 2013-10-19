@@ -21,7 +21,7 @@
                     </div>
 
         <div class="row buttons">
-        <?php echo CHtml::submitButton(Yii::t('dbrisinajumi.fcrn', 'Search')); ?>
+        <?php echo CHtml::submitButton(Yii::t('FcrnModule.crud_static', 'Search')); ?>
     </div>
 
     <?php $this->endWidget(); ?>

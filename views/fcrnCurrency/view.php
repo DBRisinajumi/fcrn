@@ -1,17 +1,17 @@
 <?php
-$this->breadcrumbs[Yii::t('dbrisinajumi.fcrn','Fcrn Currencies')] = array('admin');
+$this->breadcrumbs[Yii::t('FcrnModule.crud','Fcrn Currencies')] = array('admin');
 $this->breadcrumbs[] = $model->fcrn_id;
 ?>
 <?php $this->widget("TbBreadcrumbs", array("links"=>$this->breadcrumbs)) ?>
 <h1>
-    <?php echo Yii::t('dbrisinajumi.fcrn','Fcrn Currency')?> <small><?php echo Yii::t('dbrisinajumi.fcrn','View')?> #<?php echo $model->fcrn_id ?></small></h1>
+    <?php echo Yii::t('FcrnModule.crud','Fcrn Currency')?> <small><?php echo Yii::t('FcrnModule.crud_static','View')?> #<?php echo $model->fcrn_id ?></small></h1>
 
 
 
 <?php $this->renderPartial("_toolbar", array("model"=>$model)); ?>
 
 <h2>
-    <?php echo Yii::t('dbrisinajumi.fcrn','Data')?></h2>
+    <?php echo Yii::t('FcrnModule.crud_static','Data')?></h2>
 
 <p>
     <?php
@@ -26,7 +26,7 @@ $this->breadcrumbs[] = $model->fcrn_id;
 
 
 <h2>
-    <?php echo Yii::t('dbrisinajumi.fcrn','Relations')?></h2>
+    <?php echo Yii::t('FcrnModule.crud_static','Relations')?></h2>
 
 <div class='well'>
     <div class='row'>

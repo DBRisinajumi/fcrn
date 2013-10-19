@@ -1,5 +1,5 @@
 <?php
-//yiic message ../vendor/dbrisinajumi/fcrn/translation.php
+//yiic message ../vendor/FcrnModule.crud/translation.php
 
 return array(
     'sourcePath' => dirname(__FILE__) . DIRECTORY_SEPARATOR ,  //root dir of all source

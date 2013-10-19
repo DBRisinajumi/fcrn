@@ -1,5 +1,5 @@
 <?php
-$this->breadcrumbs[] = Yii::t('dbrisinajumi.fcrn','Fcrt Currency Rates');
+$this->breadcrumbs[] = Yii::t('FcrnModule.crud','Fcrt Currency Rates');
 
 
 Yii::app()->clientScript->registerScript('search', "
@@ -18,7 +18,7 @@ return false;
 
 <?php $this->widget("TbBreadcrumbs", array("links"=>$this->breadcrumbs)) ?>
 <h1>
-    <?php echo Yii::t('dbrisinajumi.fcrn', 'Fcrt Currency Rates'); ?> <small><?php echo Yii::t('dbrisinajumi.fcrn', 'Manage'); ?></small>
+    <?php echo Yii::t('FcrnModule.crud', 'Fcrt Currency Rates'); ?> <small><?php echo Yii::t('FcrnModule.crud_static', 'Manage'); ?></small>
 </h1>
 
 <?php $this->renderPartial("_toolbar", array("model"=>$model)); ?>
