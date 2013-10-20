@@ -11,8 +11,8 @@
                     </div>
 
                     <div class="row">
-            <?php echo $form->label($model,'fcrt_fcrn_id'); ?>
-                            <?php echo $form->dropDownList($model,'fcrt_fcrn_id',CHtml::listData(FcrnCurrency::model()->findAll(), 'fcrn_id', 'fcrn_code'),array('prompt'=>'all')); ?>
+            <?php echo $form->label($model,'fcrt_base_fcrn_id'); ?>
+                            <?php echo $form->dropDownList($model,'fcrt_base_fcrn_id',CHtml::listData(FcrnCurrency::model()->findAll(), 'fcrn_id', 'fcrn_code'),array('prompt'=>'all')); ?>
                     </div>
 
                     <div class="row">

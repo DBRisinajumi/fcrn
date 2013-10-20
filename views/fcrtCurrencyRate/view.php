@@ -18,18 +18,24 @@ $this->breadcrumbs[] = $model->fcrt_id;
     $this->widget('TbDetailView', array(
     'data'=>$model,
     'attributes'=>array(
-            'fcrt_id',
+//            'fcrt_id',
+        array(
+            'name'=>'fcrt_base_fcrn_id',
+            'value'=>$model->fcrtFcrn->fcrn_code,
+        ),
         array(
             'name'=>'fcrt_fcrn_id',
-            'value'=>($model->fcrtFcrn !== null)?'<span class=label>CBelongsToRelation</span><br/>'.CHtml::link($model->fcrtFcrn->fcrn_code, array('fcrnCurrency/view','fcrn_id'=>$model->fcrtFcrn->fcrn_id), array('class'=>'btn')):'n/a',
-            'type'=>'html',
+            'value'=>$model->fcrtToFcrn->fcrn_code,
         ),
+        'fcrt_fcsr_id',
         'fcrt_date',
         'fcrt_rate',
 ),
         )); ?></p>
-
-
-<h2>
-    <?php echo Yii::t('FcrnModule.crud_static','Relations')?></h2>
-
+<?
+$r = Yii::app()->currency->getCurrencyRate(6,'2013-09-20');
+if(!$r){
+    echo Yii::app()->currency->sError;
+}else{
+    echo $r;
+}

@@ -34,7 +34,7 @@ return false;
     'columns'=>array(
 		'fcrt_id',
 		array(
-					'name'=>'fcrt_fcrn_id',
+					'name'=>'fcrt_base_fcrn_id',
 					'value'=>'CHtml::value($data,\'fcrtFcrn.fcrn_code\')',
 							'filter'=>CHtml::listData(FcrnCurrency::model()->findAll(), 'fcrn_id', 'fcrn_code'),
 							),

@@ -49,7 +49,7 @@ abstract class BaseFcrnCurrency extends CActiveRecord{
 	public function relations()
 	{
 		return array(
-			'fcrtCurrencyRates' => array(self::HAS_MANY, 'FcrtCurrencyRate', 'fcrt_fcrn_id'),
+			'fcrtCurrencyRates' => array(self::HAS_MANY, 'FcrtCurrencyRate', 'fcrt_base_fcrn_id'),
 		);
 	}
 

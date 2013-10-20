@@ -34,7 +34,7 @@ $this->breadcrumbs[] = $model->fcrn_id;
         'type'=>'', // '', 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'
         'buttons'=>array(
             array('label'=>'fcrtCurrencyRates', 'icon'=>'icon-list-alt', 'url'=> array('fcrtCurrencyRate/admin')),
-                array('icon'=>'icon-plus', 'url'=>array('fcrtCurrencyRate/create', 'FcrtCurrencyRate' => array('fcrt_fcrn_id'=>$model->{$model->tableSchema->primaryKey}))),
+                array('icon'=>'icon-plus', 'url'=>array('fcrtCurrencyRate/create', 'FcrtCurrencyRate' => array('fcrt_base_fcrn_id'=>$model->{$model->tableSchema->primaryKey}))),
         ),
     )); ?></div><div class='span8'>
 <?php
