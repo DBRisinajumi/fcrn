@@ -76,7 +76,7 @@
             <div class="btn-group">
             <?php $this->widget('bootstrap.widgets.TbButtonGroup', array(
         'buttons'=>array(
-                array('label'=>Yii::t('FcrnModule.crud_static','Relations'), 'icon'=>'icon-search', 'items'=>array(array('label'=>'fcrtFcrn - FcrnCurrency', 'url' =>array('fcrnCurrency/admin')),
+                array('label'=>Yii::t('FcrnModule.crud_static','Relations'), 'icon'=>'icon-search', 'items'=>array(array('label'=>'fcrtBaseFcrn - FcrnCurrency', 'url' =>array('fcrnCurrency/admin')),
             )
           ),
         ),

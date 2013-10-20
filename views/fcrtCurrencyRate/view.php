@@ -21,21 +21,14 @@ $this->breadcrumbs[] = $model->fcrt_id;
 //            'fcrt_id',
         array(
             'name'=>'fcrt_base_fcrn_id',
-            'value'=>$model->fcrtFcrn->fcrn_code,
+            'value'=>$model->fcrtBaseFcrn->fcrn_code,
         ),
         array(
             'name'=>'fcrt_fcrn_id',
-            'value'=>$model->fcrtToFcrn->fcrn_code,
+            'value'=>$model->fcrtFcrn->fcrn_code,
         ),
         'fcrt_fcsr_id',
         'fcrt_date',
         'fcrt_rate',
 ),
         )); ?></p>
-<?
-$r = Yii::app()->currency->getCurrencyRate(6,'2013-09-20');
-if(!$r){
-    echo Yii::app()->currency->sError;
-}else{
-    echo $r;
-}

@@ -4,38 +4,94 @@ class FcrnRate extends CApplicationComponent {
 
     const SOURCE_BANK_LV = 1;
     const SOURCE_BANK_LT = 2;
-    
+    const C_LVL = 3;
+    const C_EUR = 1;
+
     var $sError = FALSE;
     var $base = self::SOURCE_BANK_LV;
     var $source = self::SOURCE_BANK_LV;
-    
+    private $_currencyId2Code = FALSE;
+    private $_currencyCode2Id = FALSE;
+    private $_source = FALSE;
+
+    public function getCurrencyCode2Id() {
+        if ($this->_currencyCode2Id === FALSE) {
+            $this->_loadCurrencyCodes();
+        }
+        return $this->_currencyCode2Id;
+    }
+
+    public function getCurrencyId2Code() {
+        if ($this->_currencyId2Code === FALSE) {
+            $this->_loadCurrencyCodes();
+        }
+        return $this->_currencyId2Code;
+    }
+
+    public function getBaseCurrency($source, $date) {
+        //FOR BANK.LV hard codded currency changes
+        if ($source == self::SOURCE_BANK_LV) {
+            if ($date < '2014.01.01') {
+                return self::C_LVL;
+            } else {
+                return self::C_EUR;
+            }
+        }
+        if ($this->_source === FALSE) {
+            $this->_loadSources();
+        }
+
+        return $this->_source[$source]['fcsr_base_fcrn_id'];
+    }
+
+    public function _loadSources() {
+        $this->_source = array();
+        $sSql = "SELECT
+                    *
+                FROM
+                    fcsr_courrency_source
+                ";
+        $result = Yii::app()->db->createCommand($sSql)->queryAll();
+        foreach ($result as $row) {
+            $this->_source[$row['fcsr_id']] = $row;
+        }
+    }
+
+    public function _loadCurrencyCodes() {
+        $this->_currencyId2Code = $this->_currencyCode2Id = array();
+        $sSql = "SELECT
+                    fcrn_id,
+                    fcrn_code
+                FROM
+                    fcrn_currency
+                ";
+        $result = Yii::app()->db->createCommand($sSql)->queryAll();
+        foreach ($result as $row) {
+            $this->_currencyId2Code[$row['fcrn_id']] = $row['fcrn_code'];
+            $this->_currencyCode2Id[$row['fcrn_code']] = $row['fcrn_id'];
+        }
+    }
 
     /**
      * Get cyrrency id by currency code
      * @param char $sCode currency code
      * @return boolean|int - currency id
      */
-    public function getCurrencyIdByCode($sCode) {
+    public function getCurrencyIdByCode($code) {
         $this->sError = FALSE;
 
-        $sSql = "SELECT
-                    fcrn_id
-                FROM
-                    fcrn_currency
-                WHERE
-                    fcrn_code = '" . $sCode . "'
-                ";
-        $result = Yii::app()->db->createCommand($sSql)->queryScalar(); 
+        if ($this->_currencyCode2Id === FALSE) {
+            $this->_loadCurrencyCodes();
+        }
 
-        if (!$result) {
-            $this->sError = 'Incorect currency code: ' . $sCode;
+        if (!isset($this->_currencyCode2Id[$code])) {
+            $this->sError = 'Incorect currency code: ' . $code;
             return FALSE;
         }
-        
-        return $result;
 
+        return $this->_currencyCode2Id[$code];
     }
-    
+
     /**
      * Validate currency ID
      * @param char $id currency id
@@ -44,23 +100,14 @@ class FcrnRate extends CApplicationComponent {
     public function isValidCurrencyId($id) {
         $this->sError = FALSE;
 
-        $sSql = "SELECT
-                    fcrn_id
-                FROM
-                    fcrn_currency
-                WHERE
-                    fcrn_id = '" . $id . "'
-                ";
-        $result = Yii::app()->db->createCommand($sSql)->queryScalar(); 
-
-        if (!$result) {
+        if (!$this->getCurrencyId2Code($id)) {
             $this->sError = 'Incorect currency id: ' . $id;
             return FALSE;
         }
-        
-        return TRUE;
 
+        return TRUE;
     }
+
     /**
      * Validate SOURCE ID
      * @param char $id source id
@@ -69,23 +116,15 @@ class FcrnRate extends CApplicationComponent {
     public function isValidSourceId($source) {
         $this->sError = FALSE;
 
-        $sSql = "SELECT
-                    fcsr_id
-                FROM
-                    fcsr_courrency_source
-                WHERE
-                    fcsr_id = '" . $source . "'
-                ";
-        $result = Yii::app()->db->createCommand($sSql)->queryScalar(); 
-        $aRow = MySQL::q($sSql);
-
-        if (!$result) {
+        if ($this->_source === FALSE) {
+            $this->_loadSources();
+        }
+        if (!isset($this->_source[$source])) {
             $this->sError = 'Incorect source id: ' . $source;
             return FALSE;
         }
-        
-        return TRUE;
 
+        return TRUE;
     }
 
     /**
@@ -94,110 +133,67 @@ class FcrnRate extends CApplicationComponent {
      * @param date $dDate format yyyy.mm.dd
      * @return boolean|float - currency rate
      */
-    public function getCurrencyRate($id, $date, $base = FALSE,$source = FALSE) {
+    public function getCurrencyRate($id, $date, $source = FALSE) {
         $this->sError = FALSE;
-        
-        
-        
+
         /**
          * validate input param
          */
-        
-        if(!$this->isValidCurrencyId($id)){
+        if (!$this->isValidCurrencyId($id)) {
             return FALSE;
         }
 
-       if ($date) {
-           $sSql = "SELECT IF(DATEDIFF('" . $date . "',CURDATE())>0, 1, 0) in_future ";
-           $result = Yii::app()->db->createCommand($sSql)->queryScalar();
+        if ($date) {
+            $sSql = "SELECT IF(DATEDIFF('" . $date . "',CURDATE())>0, 1, 0) in_future ";
+            $result = Yii::app()->db->createCommand($sSql)->queryScalar();
             if ($result == 1) {
                 $this->sError = "Can not get currency rate, Date(" . $date . ") is in future.";
                 return FALSE;
             }
         }
-        
-        if($base){
-            if(!$this->isValidCurrencyId($base)){
+
+        if ($source) {
+            if (!$this->isValidSourceId($source)) {
                 return FALSE;
             }
-        }else{
-            $base = $this->base;
-        }
-        
-        if($source){
-            if(!$this->isValidSourceId($source)){
-                return FALSE;
-            }
-        }else{
+        } else {
             $source = $this->source;
         }
+
+        $base = $this->getBaseCurrency($source, $date);
+
+        $rate = $this->_getRateFromDb($source, $base, $id, $date);
+
+        /**
+         * load rates
+         */
+        if ($rate) {
+            return $rate;
+        }
+        if ($source == self::SOURCE_BANK_LV) {
+            $aRate = $this->_getRateFromBankLv($date);
+            if (!$aRate) {
+                return FALSE;
+            }
+        } elseif ($source == self::SOURCE_BANK_LT) {
+            $aRate = $this->_getRateFromBankLt($date);
+            if (!$aRate) {
+                return FALSE;
+            }
+        }
+
+        $this->_saveRate($aRate, $date, $source);
 
         return $this->_getRateFromDb($source, $base, $id, $date);
     }
 
     /**
-     * valutas kurrs valūtai uz konkrēto datumu
-     * @param int $nId currency id
-     * @param date $dDate format yyyy.mm.dd
-     * @return boolean|float - currency rate
-     */
-    private function getCurrencyRateaaa($nId, $dDate) {
-        $this->sError = FALSE;
-
-        /**
-         * sys valutas kurs ir 1 vienmer
-         */
-        if ($nId == CONFIG_SYS_CURRENCY) {
-            return 1;
-        }
-
-        if ($dDate) {
-            $aDates = MySQL::q("SELECT IF(DATEDIFF('" . $dDate . "',CURDATE())>0, 1, 0) in_future ");
-            if ($aDates[0]['in_future'] == 1) {
-                $this->sError = "Can not get currency rate, Date(" . $dDate . ") is in future.";
-                return FALSE;
-            }
-        }
-
-        /**
-         * meklē kursu iekš DB
-         */
-        $nRate = $this->_getRateFromDb($nId, $dDate);
-        if ($nRate) {
-            return $nRate;
-        }
-
-        /**
-         * kursu uz aktuālo datumu nolasa no bank.lv
-         */
-        $aRate = $this->_getRateFromBankLv($dDate);
-        if (!$aRate) {
-            return FALSE;
-        }
-
-        /**
-         * saglabā bank.lv datus
-         */
-        $this->_saveRate($aRate, $dDate);
-
-        /**
-         * meklē kursu iekš DB
-         */
-        $nRate = $this->_getRateFromDb($nId, $dDate);
-        if (!$aRate) {
-            $this->sError = 'Neizdevās nolasīt valūtas kursu no bank.lv';
-            return FALSE;
-        }
-
-        return $nRate;
-    }
-
-    /**
      * nolasa valūtas kursus no bank.lv prasītajam datumam
+     * doc: http://www.bank.lv/monetara-politika/latvijas-bankas-noteiktie-valutu-kursi-xml-formata
      * @param char $nDate date in yyyy.mm.dd vai yyyymmdd format
      * @return boolean|int
      */
-    private function _getRateFromBankLv($nDate) {
+    public function _getRateFromBankLv($nDate) {
         $aResRate = array();
 
         $nDate = preg_replace('#[^0-9]*#', '', $nDate);
@@ -221,7 +217,41 @@ class FcrnRate extends CApplicationComponent {
 
             $aResRate[$v] = $nCurrencyRate;
         }
-        $aResRate['LVL'] = 1;
+        return $aResRate;
+    }
+
+    /**
+     * get currency rate from Bank Lituania
+     * link example: http://webservices.lb.lt/ExchangeRates/ExchangeRates.asmx/getExchangeRatesByDate?Date=2013.09.14
+     * doc: http://webservices.lb.lt/ExchangeRates/ExchangeRates_En.htm
+     * @param char $nDate date in yyyy.mm.dd vai yyyymmdd format
+     * @return boolean|int
+     */
+    public function _getRateFromBankLt($nDate) {
+        $aResRate = array();
+
+        $nDate = preg_replace('#[^0-9]*#', '', $nDate);
+        $sUrl = "http://webservices.lb.lt/ExchangeRates/ExchangeRates.asmx/getExchangeRatesByDate?date=" . $nDate;
+
+        $cXML = file_get_contents($sUrl);
+        if (!$cXML) {
+            $this->sError = 'Neizdevās pieslēgties bl.ll';
+            return false;
+        }
+
+        preg_match_all("#<currency>(.*?)</currency>#", $cXML, $aIDs);
+        preg_match_all("#<quantity>(.*?)</quantity>#", $cXML, $aUnits);
+        preg_match_all("#<rate>(.*?)</rate>#", $cXML, $aRate);
+
+        foreach ($aIDs[1] as $k => $v) {
+            if ($aUnits[1][$k] > 1)
+                $nCurrencyRate = $aRate[1][$k] / $aUnits[1][$k];
+            else
+                $nCurrencyRate = $aRate[1][$k];
+
+            $aResRate[$v] = $nCurrencyRate;
+        }
+
         return $aResRate;
     }
 
@@ -231,73 +261,68 @@ class FcrnRate extends CApplicationComponent {
      * @param type $dDate
      * @return boolean
      */
-    private function _saveRate($aRate, $dDate) {
+    private function _saveRate($aRate, $date, $source) {
 
+
+        $base = $this->getBaseCurrency($source, $date);
+
+        //for base currency rate always is 1
+        $aRate[$base] = 1;
         /**
-         * savāc vajadzīgās valūtas
+         * iet cauri kursiem un saglabā tos
          */
-        $aCurr = array();
-        $sSql = "
-SELECT
-id,
-currency_code
-FROM
-currency
-";
-        $aC = MySQL::q($sSql);
-        foreach ($aC as $aRow) {
-            $aCurr[$aRow['currency_code']] = $aRow['id'];
-        }
-
-        /**
-         * iet cauri bank.lv kursiem un saglabā tos
-         */
-        foreach ($aRate as $sCurCode => $nRate) {
-
-            if (!isset($aCurr[$sCurCode])) {
+        foreach ($aRate as $fcrn_code => $rate) {
+            $id = $this->getCurrencyIdByCode($fcrn_code);
+            if (!$id) {
                 /**
                  * valūta nav starp vajadzīgajām valūtam
                  */
                 continue;
             }
-            $nCurrId = $aCurr[$sCurCode];
 
             /**
              * vai tāds ieraksts jau nav tabulā
              */
-            $sSql = "
-SELECT
-id
-FROM
-currency_rate
-WHERE
-currency_id = " . $nCurrId . "
-and `date` = '" . $dDate . "'
-";
-            $aC = MySQL::q($sSql);
-            if (count($aC) > 0) {
+            if ($this->_getRateFromDb($source, $base, $id, $date)) {
                 continue;
             }
 
-            /**
-             * saglabā ierakstu tabulā
-             */
-            $sSql = "
-insert into
-currency_rate
-set
-currency_id = " . $nCurrId . ",
-`date` = '" . $dDate . "',
-rate = " . $nRate . "
-";
-            $r = MySQL::s($sSql);
+            $sql = "
+                INSERT INTO fcrt_currency_rate (
+                  fcrt_fcsr_id,
+                  fcrt_base_fcrn_id,
+                  fcrt_fcrn_id,
+                  fcrt_date,
+                  fcrt_rate
+                ) 
+                VALUES
+                  (
+                    :fcrt_fcsr_id,
+                    :fcrt_base_fcrn_id,
+                    :fcrt_fcrn_id,
+                    :fcrt_date,
+                    :fcrt_rate
+                  )                
+                ";
+
+            $parameters = array(
+                ':fcrt_fcsr_id' => $source,
+                ':fcrt_base_fcrn_id' => $base, 
+                ':fcrt_fcrn_id' => $id,
+                ':fcrt_date' => $date,
+                ':fcrt_rate' => $rate,
+            );
+
+            Yii::app()->db->createCommand($sql)->execute($parameters);
         }
         return true;
     }
 
     /**
      * nolasa valūtas kursu no DB
-     * @param int $nId currency_id
+     * @param int $source rate source 
+     * @param int $base currency base
+     * @param int $id currency_id
      * @param date $dDate yyyy.mm.dd
      * @return boolean/float
      */
@@ -308,18 +333,14 @@ rate = " . $nRate . "
                 ->from('fcrt_currency_rate')
                 ->where('
                     fcrt_fcsr_id=:source 
-                    AND fcrt_fcrn_id=:from_id
-                    and fcrt_fcrn_id=:to_id
+                    AND fcrt_base_fcrn_id=:base
+                    and fcrt_fcrn_id=:id
                     and fcrt_date=:date', array(
-                        ':source' => $source,
-                        ':from_id' => $base,
-                        ':to_id' => $id,
-                        ':date' => $date
-                        
-                        ))
-//                ->where('', array(':from_id' => $base))
- //               ->where('', array())
-  //              ->where('fcrt_date=:date', array())
+                    ':source' => $source,
+                    ':base' => $base,
+                    ':id' => $id,
+                    ':date' => $date
+                ))
                 ->queryScalar();
 
 

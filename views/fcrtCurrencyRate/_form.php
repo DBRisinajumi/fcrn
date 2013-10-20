@@ -63,13 +63,13 @@
 
     <div class="row-fluid input-block-level-container">
         <div class="span12">
-        <label for="fcrtFcrn"><?php echo Yii::t('FcrnModule.crud', 'FcrtFcrn'); ?></label>
+        <label for="fcrtBaseFcrn"><?php echo Yii::t('FcrnModule.crud', 'fcrtBaseFcrn'); ?></label>
                 <?php
                 $this->widget(
 					'Relation',
 					array(
 							'model' => $model,
-							'relation' => 'fcrtFcrn',
+							'relation' => 'fcrtBaseFcrn',
 							'fields' => 'fcrn_code',
 							'allowEmpty' => false,
 							'style' => 'dropdownlist',

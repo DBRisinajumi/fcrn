@@ -10,7 +10,7 @@
  * @property double $fcrt_rate
  *
  * Relations of table "fcrt_currency_rate" available as properties of the model:
- * @property FcrnCurrency $fcrtFcrn
+ * @property FcrnCurrency $fcrtBaseFcrn
  */
 abstract class BaseFcrtCurrencyRate extends CActiveRecord{
 	public static function model($className=__CLASS__)
@@ -49,8 +49,12 @@ abstract class BaseFcrtCurrencyRate extends CActiveRecord{
 	public function relations()
 	{
 		return array(
-			'fcrtFcrn' => array(self::BELONGS_TO, 'FcrnCurrency', 'fcrt_base_fcrn_id'),
-			'fcrtToFcrn' => array(self::BELONGS_TO, 'FcrnCurrency', 'fcrt_fcrn_id'),
+			'fcrtBaseFcrn' => array(self::BELONGS_TO, 'FcrnCurrency', 'fcrt_base_fcrn_id'),
+			'fcrtFcrn' => array(self::BELONGS_TO, 'FcrnCurrency', 'fcrt_fcrn_id'),
+            /**
+             * @todo jauztaisa modelis fcsr un japieliek gridaa
+             */
+			//'fcrtFcsr' => array(self::BELONGS_TO, 'FcsrCurrencySource', 'fcrt_fcsr_id'),
 		);
 	}
 
