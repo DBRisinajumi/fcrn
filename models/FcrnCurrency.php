@@ -21,6 +21,14 @@ class FcrnCurrency extends BaseFcrnCurrency
 		return (string) $this->fcrn_code;
 
 	}
+    
+    public function getItemLabel()
+    {
+        if ($this->isNewRecord){
+            return null;
+        }
+        return (string) $this->fcrn_code;
+    }    
 
 	public function behaviors()
 	{

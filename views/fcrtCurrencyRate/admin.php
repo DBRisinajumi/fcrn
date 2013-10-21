@@ -34,6 +34,11 @@ $this->widget('TbGridView', array(
     'columns' => array(
         //'fcrt_id',
         array(
+            'name' => 'fcrt_fcsr_id',
+            'value' => 'CHtml::value($data,\'fcrtFcsr.fcsr_name\')',
+            'filter' => CHtml::listData(FcsrCourrencySource::model()->findAll(), 'fcsr_id', 'fcsr_name'),
+        ),
+        array(
             'name' => 'fcrt_base_fcrn_id',
             'value' => 'CHtml::value($data,\'fcrtBaseFcrn.fcrn_code\')',
             'filter' => CHtml::listData(FcrnCurrency::model()->findAll(), 'fcrn_id', 'fcrn_code'),

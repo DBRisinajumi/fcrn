@@ -54,7 +54,7 @@ abstract class BaseFcrtCurrencyRate extends CActiveRecord{
             /**
              * @todo jauztaisa modelis fcsr un japieliek gridaa
              */
-			//'fcrtFcsr' => array(self::BELONGS_TO, 'FcsrCurrencySource', 'fcrt_fcsr_id'),
+			'fcrtFcsr' => array(self::BELONGS_TO, 'FcsrCourrencySource', 'fcrt_fcsr_id'),
 		);
 	}
 
