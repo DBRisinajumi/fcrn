@@ -349,5 +349,20 @@ class FcrnRate extends CApplicationComponent {
         }
         return $rate;
     }
+    
+    /**
+     * convert to base currency
+     * @param decimal $amt
+     * @param int $fcrn_id
+     * @param date $date
+     * @return boolean/amt
+     */
+    public function convertToBase($amt, $fcrn_id, $date) {
+        $rate = $this->getCurrencyRate($fcrn_id, $date);
+        if ($rate === FALSE) {
+            return FALSE;
+        }
+        return round($rate * $amt, 2);
+    }
 
 }
