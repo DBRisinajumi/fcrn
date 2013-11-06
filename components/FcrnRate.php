@@ -357,12 +357,14 @@ class FcrnRate extends CApplicationComponent {
      * @param date $date
      * @return boolean/amt
      */
-    public function convertToBase($amt, $fcrn_id, $date) {
+    public function convertToBase($amt, $fcrn_id, $date,$round = 2) {
         $rate = $this->getCurrencyRate($fcrn_id, $date);
         if ($rate === FALSE) {
             return FALSE;
         }
-        return round($rate * $amt, 2);
+        return round($rate * $amt, 4);
+
+        
     }
 
 }
