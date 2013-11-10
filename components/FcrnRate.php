@@ -143,6 +143,11 @@ class FcrnRate extends CApplicationComponent {
             return FALSE;
         }
 
+        if(empty($date)){
+            $this->sError = "Date can not be empty.";            
+            return FALSE;
+        }
+        
         if ($date) {
             $sSql = "SELECT IF(DATEDIFF('" . $date . "',CURDATE())>0, 1, 0) in_future ";
             $result = Yii::app()->db->createCommand($sSql)->queryScalar();
