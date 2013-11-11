@@ -367,7 +367,7 @@ class FcrnRate extends CApplicationComponent {
         if ($rate === FALSE) {
             return FALSE;
         }
-        return round($rate * $amt, 4);
+        return round($rate * $amt, 6);
 
         
     }
