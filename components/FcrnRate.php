@@ -149,7 +149,7 @@ class FcrnRate extends CApplicationComponent {
         }
         
         if ($date) {
-            $sSql = "SELECT IF(DATEDIFF('" . $date . "',CURDATE())>0, 1, 0) in_future ";
+            $sSql = "SELECT IF(DATEDIFF('" . $date . "',CURDATE())>1, 1, 0) in_future ";
             $result = Yii::app()->db->createCommand($sSql)->queryScalar();
             if ($result == 1) {
                 $this->sError = "Can not get currency rate, Date(" . $date . ") is in future.";
