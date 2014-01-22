@@ -5,7 +5,8 @@ class FcrtCurrencyRateController extends Controller
     #public $layout='//layouts/column2';
     public $defaultAction = "admin";
     public $scenario = "crud";
-
+    public $menu_route = "fcrn/fcrtCurrencyRate";  
+    
     public function filters() {
 	return array(
 			'accessControl',
