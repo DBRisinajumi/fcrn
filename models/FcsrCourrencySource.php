@@ -23,12 +23,15 @@ class FcsrCourrencySource extends BaseFcsrCourrencySource
         return parent::getItemLabel();
     }
 
-    public function behaviors()
-    {
+    public function behaviors() {
         return array_merge(
-            parent::behaviors(),
-            array()
-        );    }
+                parent::behaviors(), array(
+             //auditrail       
+            'LoggableBehavior' => array(
+                'class' => 'LoggableBehavior'
+            ),
+        ));
+    }  
 
     public function rules()
     {

@@ -30,13 +30,15 @@ class FcrnCurrency extends BaseFcrnCurrency
         return (string) $this->fcrn_code;
     }    
 
-	public function behaviors()
-	{
-		return array_merge(
-			parent::behaviors(),
-			array(
-            ));
-	}
+    public function behaviors() {
+        return array_merge(
+                parent::behaviors(), array(
+             //auditrail       
+            'LoggableBehavior' => array(
+                'class' => 'LoggableBehavior'
+            ),
+        ));
+    }  
 
 
 	public function rules()
