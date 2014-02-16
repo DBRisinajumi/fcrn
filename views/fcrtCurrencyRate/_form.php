@@ -66,7 +66,7 @@
         <label for="fcrtBaseFcrn"><?php echo Yii::t('FcrnModule.crud', 'fcrtBaseFcrn'); ?></label>
                 <?php
                 $this->widget(
-					'Relation',
+					'\GtcRelation',
 					array(
 							'model' => $model,
 							'relation' => 'fcrtBaseFcrn',
