@@ -14,6 +14,10 @@ class FcrnRate extends CApplicationComponent {
     private $_currencyCode2Id = FALSE;
     private $_source = FALSE;
 
+    public function init(){
+        $this->base = Yii::app()->sysCompany->getAttribute('base_fcrn_id');
+    }    
+    
     public function getCurrencyCode2Id() {
         if ($this->_currencyCode2Id === FALSE) {
             $this->_loadCurrencyCodes();
@@ -142,7 +146,22 @@ class FcrnRate extends CApplicationComponent {
         if (!$this->isValidCurrencyId($id)) {
             return FALSE;
         }
+        
+        //same currency no convert
+        if($id == $this->base){
+            return 1;
+        }
+        
+        if ($source) {
+            if (!$this->isValidSourceId($source)) {
+                return FALSE;
+            }
+        } else {
+            $source = $this->source;
+        }
 
+        $base = $this->getBaseCurrency($source, $date);
+        
         if(empty($date)){
             $this->sError = "Date can not be empty.";            
             return FALSE;
@@ -156,16 +175,6 @@ class FcrnRate extends CApplicationComponent {
                 return FALSE;
             }
         }
-
-        if ($source) {
-            if (!$this->isValidSourceId($source)) {
-                return FALSE;
-            }
-        } else {
-            $source = $this->source;
-        }
-
-        $base = $this->getBaseCurrency($source, $date);
 
         $rate = $this->_getRateFromDb($source, $base, $id, $date);
 
