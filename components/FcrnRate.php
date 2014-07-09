@@ -33,14 +33,7 @@ class FcrnRate extends CApplicationComponent {
     }
 
     public function getBaseCurrency($source, $date) {
-        //FOR BANK.LV hard codded currency changes
-        if ($source == self::SOURCE_BANK_LV) {
-            if ($date < '2014.01.01') {
-                return self::C_LVL;
-            } else {
-                return self::C_EUR;
-            }
-        }
+
         if ($this->_source === FALSE) {
             $this->_loadSources();
         }
@@ -211,7 +204,7 @@ class FcrnRate extends CApplicationComponent {
         $aResRate = array();
 
         $nDate = preg_replace('#[^0-9]*#', '', $nDate);
-        $sUrl = "http://www.bank.lv/vk/xml.xml?date=" . $nDate;
+        $sUrl = "http://www.bank.lv/vk/ecb.xml?date=" . $nDate;
 
         $cXML = file_get_contents($sUrl);
         if (!$cXML) {
@@ -220,16 +213,10 @@ class FcrnRate extends CApplicationComponent {
         }
 
         preg_match_all("#<ID>(.*?)</ID>#", $cXML, $aIDs);
-        preg_match_all("#<Units>(.*?)</Units>#", $cXML, $aUnits);
         preg_match_all("#<Rate>(.*?)</Rate>#", $cXML, $aRate);
 
         foreach ($aIDs[1] as $k => $v) {
-            if ($aUnits[1][$k] > 1)
-                $nCurrencyRate = $aRate[1][$k] / $aUnits[1][$k];
-            else
-                $nCurrencyRate = $aRate[1][$k];
-
-            $aResRate[$v] = $nCurrencyRate;
+            $aResRate[$v] = $aRate[1][$k];
         }
         return $aResRate;
     }
@@ -371,12 +358,34 @@ class FcrnRate extends CApplicationComponent {
      * @param date $date
      * @return boolean/amt
      */
-    public function convertToBase($amt, $fcrn_id, $date,$round = 2) {
+    public function convertToBase($amt, $fcrn_id, $date,$round = 6) {
         $rate = $this->getCurrencyRate($fcrn_id, $date);
         if ($rate === FALSE) {
             return FALSE;
         }
-        return round($rate * $amt, 6);
+        return round($rate * $amt, $round);
+
+        
+    }
+    
+    /**
+     * convert from one currency to other
+     * @param int $from_fcrn_id
+     * @param int $to_fcrn_id
+     * @param decimal $amt
+     * @param date $date
+     * @return boolean/amt
+     */
+    public function convertFromTo($from_fcrn_id,$to_fcrn_id,$amt,  $date,$round = 6) {
+        $from_rate = $this->getCurrencyRate($from_fcrn_id, $date);
+       if ($from_rate === FALSE) {
+            return FALSE;
+        }        
+        $to_rate = $this->getCurrencyRate($to_fcrn_id, $date);
+        if ($to_rate === FALSE) {
+            return FALSE;
+        }
+        return round($from_rate/$to_rate * $amt, $round);
 
         
     }
