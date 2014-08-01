@@ -390,4 +390,37 @@ class FcrnRate extends CApplicationComponent {
         
     }
 
+    /**
+     * 
+     * @param type $date
+     * @param type $fcrn_id
+     * @param type $round
+     * @param type $base_fcrn_id
+     * @param type $source
+     * @return boolean
+     */
+    public function getCurrencyRateExt($date,$fcrn_id,$round = 6,$base_fcrn_id = false,$source=false){
+        if(!$base_fcrn_id){
+            $base_fcrn_id = $this->base;
+        }
+        
+        if($base_fcrn_id == $this->base){
+            return $this->getCurrencyRate($fcrn_id, $date, $source);
+        }
+        
+        $rate = $this->getCurrencyRate($fcrn_id, $date, $source);
+        if ($rate === FALSE) {
+            return FALSE;
+        }
+
+        $base_rate = $this->getCurrencyRate($base_fcrn_id, $date, $source);
+        if ($base_rate === FALSE) {
+            return FALSE;
+        }
+ 
+        return round($rate/$base_rate, $round);
+        
+        
+    }
+    
 }
