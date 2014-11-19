@@ -423,4 +423,41 @@ class FcrnRate extends CApplicationComponent {
         
     }
     
+    public function isRateForDate($date){
+
+        $rate = Yii::app()->db->createCommand()
+                ->select('fcrt_rate')
+                ->from('fcrt_currency_rate')
+                ->where('
+                    fcrt_fcsr_id=:source 
+                    AND fcrt_base_fcrn_id=:base
+                    and fcrt_date=:date', array(
+                    ':source' => $this->source,
+                    ':base' => $this->base,
+                    ':date' => $date
+                ))
+                ->queryRow();
+
+
+        if ($rate) {
+            return TRUE;
+        }
+        
+       if ($this->source == self::SOURCE_BANK_LV) {
+            $aRate = $this->_getRateFromBankLv($date);
+            if (!$aRate) {
+                return FALSE;
+            }
+        } 
+        
+        if ($this->source == self::SOURCE_BANK_LT) {
+            $aRate = $this->_getRateFromBankLt($date);
+            if (!$aRate) {
+                return FALSE;
+            }
+        }             
+        return true;
+        
+    }
+    
 }
