@@ -222,6 +222,9 @@ class FcrnRate extends CApplicationComponent {
     }
 
     /**
+     * changed to EUR
+     * doc :http://www.lb.lt/webservices/FxRates/FxRates.asmx?op=getFxRates
+     * 
      * get currency rate from Bank Lituania
      * link example: http://webservices.lb.lt/ExchangeRates/ExchangeRates.asmx/getExchangeRatesByDate?Date=2013.09.14
      * doc: http://webservices.lb.lt/ExchangeRates/ExchangeRates_En.htm
@@ -231,26 +234,37 @@ class FcrnRate extends CApplicationComponent {
     public function _getRateFromBankLt($nDate) {
         $aResRate = array();
 
-        $nDate = preg_replace('#[^0-9]*#', '', $nDate);
-        $sUrl = "http://webservices.lb.lt/ExchangeRates/ExchangeRates.asmx/getExchangeRatesByDate?date=" . $nDate;
-
+     //  $nDate = preg_replace('#[^0-9]*#', '', $nDate);
+     //    $sUrl = "http://webservices.lb.lt/ExchangeRates/ExchangeRates.asmx/getExchangeRatesByDate?date=" . $nDate;
+        
+        $sUrl = "http://webservices.lb.lt/FxRates/FxRates.asmx/getFxRates?tp=EU&dt=" . $nDate;
+        
         $cXML = file_get_contents($sUrl);
         if (!$cXML) {
             $this->sError = 'Neizdevās pieslēgties bl.ll';
             return false;
         }
+        
+        $aXml = new SimpleXMLElement($cXML);
 
-        preg_match_all("#<currency>(.*?)</currency>#", $cXML, $aIDs);
-        preg_match_all("#<quantity>(.*?)</quantity>#", $cXML, $aUnits);
-        preg_match_all("#<rate>(.*?)</rate>#", $cXML, $aRate);
-
-        foreach ($aIDs[1] as $k => $v) {
-            if ($aUnits[1][$k] > 1)
-                $nCurrencyRate = $aRate[1][$k] / $aUnits[1][$k];
-            else
-                $nCurrencyRate = $aRate[1][$k];
-
-            $aResRate[$v] = $nCurrencyRate;
+//        preg_match_all("#<currency>(.*?)</currency>#", $cXML, $aIDs);
+//        preg_match_all("#<quantity>(.*?)</quantity>#", $cXML, $aUnits);
+//        preg_match_all("#<rate>(.*?)</rate>#", $cXML, $aRate);
+//
+//        foreach ($aIDs[1] as $k => $v) {
+//            if ($aUnits[1][$k] > 1)
+//                $nCurrencyRate = $aRate[1][$k] / $aUnits[1][$k];
+//            else
+//                $nCurrencyRate = $aRate[1][$k];
+//
+//            $aResRate[$v] = $nCurrencyRate;
+//        }
+        
+        
+        foreach($aXml->FxRate as $k => $v)    {
+            
+             $currency = (string) $v->CcyAmt[1]->Ccy;
+             $aResRate[$currency] = (float) $v->CcyAmt[0]->Amt / (float) $v->CcyAmt[1]->Amt;   
         }
 
         return $aResRate;
