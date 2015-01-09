@@ -13,11 +13,51 @@ class FcrnRate extends CApplicationComponent {
     private $_currencyId2Code = FALSE;
     private $_currencyCode2Id = FALSE;
     private $_source = FALSE;
+    
+    /**
+     * syscompany period base currencies list from table fcbc_ccmp_base_currency
+     * @var type 
+     */
+    private $_base_currencies = false;
 
     public function init(){
-        $this->base = Yii::app()->sysCompany->getAttribute('base_fcrn_id');
+        //$this->base = Yii::app()->sysCompany->getAttribute('base_fcrn_id');
+        
+        //load sys comany base currencies
+        $sSql = "
+            SELECT 
+              fcbc_year_from,
+              fcbc_year_to,
+              fcbc_fcsr_id,
+              fcbc_fcrn_id 
+            FROM
+              fcbc_ccmp_base_currency 
+            WHERE fcbc_ccmp_id = ".Yii::app()->sysCompany->getActiveCompany()."
+                ";
+        $this->_base_currencies = Yii::app()->db->createCommand($sSql)->queryAll();
     }    
     
+    /**
+     * Look for base currency on date
+     * @param char $date YYYY.....
+     * @return int
+     * @throws CHttpException
+     */
+    public function getSysCcmpBaseCurrency($date){
+        if(!preg_match('#\A\d\d\d\d#',$date,$match)){
+            throw new CHttpException(400, 'invalid date in getSysCcmpBaseCurrency(): ' . $date);
+        }
+        $year = (int)$match[0];
+        foreach($this->_base_currencies as $bc){
+            if($bc['fcbc_year_from'] >= $year 
+                    && (empty($bc['fcbc_year_to']) || $bc['fcbc_year_to'] <= $year) ){
+                return $bc['fcbc_fcrn_id'];
+            }
+        }
+        
+        throw new CHttpException(400, Yii::t('FcrnModule.crud_static', 'Please define for ' . $date . ' base currency!'));
+    }
+
     public function getCurrencyCode2Id() {
         if ($this->_currencyCode2Id === FALSE) {
             $this->_loadCurrencyCodes();
@@ -32,6 +72,18 @@ class FcrnRate extends CApplicationComponent {
         return $this->_currencyId2Code;
     }
 
+    public function convId2Code($fcrn_id) {
+        $a = $this->getCurrencyId2Code();
+        return $a[$fcrn_id];
+    }    
+    
+    /**
+     * 
+     * @param type $source
+     * @param type $date
+     * @return type
+     * @todo jokeriģē !!!!!!!!
+     */
     public function getBaseCurrency($source, $date) {
 
         if ($this->_source === FALSE) {
@@ -141,7 +193,8 @@ class FcrnRate extends CApplicationComponent {
         }
         
         //same currency no convert
-        if($id == $this->base){
+        $base_fcrn_id = $this->getSysCcmpBaseCurrency($date);
+        if($id == $base_fcrn_id){
             return 1;
         }
         
@@ -415,10 +468,10 @@ class FcrnRate extends CApplicationComponent {
      */
     public function getCurrencyRateExt($date,$fcrn_id,$round = 6,$base_fcrn_id = false,$source=false){
         if(!$base_fcrn_id){
-            $base_fcrn_id = $this->base;
+            return $this->getCurrencyRate($fcrn_id, $date, $source);
         }
         
-        if($base_fcrn_id == $this->base){
+        if($base_fcrn_id == $this->getSysCcmpBaseCurrency($date)){
             return $this->getCurrencyRate($fcrn_id, $date, $source);
         }
         
@@ -447,7 +500,7 @@ class FcrnRate extends CApplicationComponent {
                     AND fcrt_base_fcrn_id=:base
                     and fcrt_date=:date', array(
                     ':source' => $this->source,
-                    ':base' => $this->base,
+                    ':base' => $this->getSysCcmpBaseCurrency($date),
                     ':date' => $date
                 ))
                 ->queryRow();
