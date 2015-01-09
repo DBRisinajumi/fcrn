@@ -55,7 +55,28 @@ class FcrnRate extends CApplicationComponent {
             }
         }
         
-        throw new CHttpException(400, Yii::t('FcrnModule.crud_static', 'Please define for ' . $date . ' base currency!'));
+        throw new CHttpException(400, 'Please define for ' . $date . ' base currency!');
+    }
+
+    /**
+     * Look for base currency on date
+     * @param char $date YYYY.....
+     * @return int
+     * @throws CHttpException
+     */
+    public function getSysCcmpCurrencySource($date){
+        if(!preg_match('#\A\d\d\d\d#',$date,$match)){
+            throw new CHttpException(400, 'invalid date in getSysCcmpCurrencySource(): ' . $date);
+        }
+        $year = (int)$match[0];
+        foreach($this->_base_currencies as $bc){
+            if($bc['fcbc_year_from'] >= $year 
+                    && (empty($bc['fcbc_year_to']) || $bc['fcbc_year_to'] <= $year) ){
+                return $bc['fcbc_fcsr_id'];
+            }
+        }
+        
+        throw new CHttpException(400, 'Please define for ' . $date . ' base currency!');
     }
 
     public function getCurrencyCode2Id() {
@@ -78,13 +99,11 @@ class FcrnRate extends CApplicationComponent {
     }    
     
     /**
-     * 
-     * @param type $source
-     * @param type $date
-     * @return type
-     * @todo jokeriģē !!!!!!!!
+     * get source base currency
+     * @param int $source
+     * @return int base currency id fcrn_id
      */
-    public function getBaseCurrency($source, $date) {
+    public function getSourceBaseCurrency($source) {
 
         if ($this->_source === FALSE) {
             $this->_loadSources();
@@ -203,10 +222,10 @@ class FcrnRate extends CApplicationComponent {
                 return FALSE;
             }
         } else {
-            $source = $this->source;
+            $source = $this->getSysCcmpCurrencySource($date);
         }
 
-        $base = $this->getBaseCurrency($source, $date);
+        $base = $this->getSourceBaseCurrency($source);
         
         if(empty($date)){
             $this->sError = "Date can not be empty.";            
@@ -332,7 +351,7 @@ class FcrnRate extends CApplicationComponent {
     private function _saveRate($aRate, $date, $source) {
 
 
-        $base = $this->getBaseCurrency($source, $date);
+        $base = $this->getSourceBaseCurrency($source);
 
         //for base currency rate always is 1
         $aRate[$base] = 1;
@@ -492,6 +511,8 @@ class FcrnRate extends CApplicationComponent {
     
     public function isRateForDate($date){
 
+        $source = $this->getSysCcmpCurrencySource($date);
+        
         $rate = Yii::app()->db->createCommand()
                 ->select('fcrt_rate')
                 ->from('fcrt_currency_rate')
@@ -499,7 +520,7 @@ class FcrnRate extends CApplicationComponent {
                     fcrt_fcsr_id=:source 
                     AND fcrt_base_fcrn_id=:base
                     and fcrt_date=:date', array(
-                    ':source' => $this->source,
+                    ':source' => $this->getSysCcmpCurrencySource(),
                     ':base' => $this->getSysCcmpBaseCurrency($date),
                     ':date' => $date
                 ))
@@ -510,14 +531,14 @@ class FcrnRate extends CApplicationComponent {
             return TRUE;
         }
         
-       if ($this->source == self::SOURCE_BANK_LV) {
+       if ($source == self::SOURCE_BANK_LV) {
             $aRate = $this->_getRateFromBankLv($date);
             if (!$aRate) {
                 return FALSE;
             }
         } 
         
-        if ($this->source == self::SOURCE_BANK_LT) {
+        if ($source == self::SOURCE_BANK_LT) {
             $aRate = $this->_getRateFromBankLt($date);
             if (!$aRate) {
                 return FALSE;
