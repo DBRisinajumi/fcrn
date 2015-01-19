@@ -49,8 +49,8 @@ class FcrnRate extends CApplicationComponent {
         }
         $year = (int)$match[0];
         foreach($this->_base_currencies as $bc){
-            if($bc['fcbc_year_from'] >= $year 
-                    && (empty($bc['fcbc_year_to']) || $bc['fcbc_year_to'] <= $year) ){
+            if($bc['fcbc_year_from'] <= $year 
+                    && (empty($bc['fcbc_year_to']) || $bc['fcbc_year_to'] >= $year) ){
                 return $bc['fcbc_fcrn_id'];
             }
         }
@@ -70,8 +70,8 @@ class FcrnRate extends CApplicationComponent {
         }
         $year = (int)$match[0];
         foreach($this->_base_currencies as $bc){
-            if($bc['fcbc_year_from'] >= $year 
-                    && (empty($bc['fcbc_year_to']) || $bc['fcbc_year_to'] <= $year) ){
+            if($bc['fcbc_year_from'] <= $year 
+                    && (empty($bc['fcbc_year_to']) || $bc['fcbc_year_to'] >= $year) ){
                 return $bc['fcbc_fcsr_id'];
             }
         }
@@ -249,6 +249,10 @@ class FcrnRate extends CApplicationComponent {
         if ($rate) {
             return $rate;
         }
+         /**
+         * @todo add convert type to fcsr_courrency_source as definition 
+         * and implement it in $this->convertFromTo
+         */
         if ($source == self::SOURCE_BANK_LV) {
             $aRate = $this->_getRateFromBankLv($date);
             if (!$aRate) {
@@ -463,16 +467,23 @@ class FcrnRate extends CApplicationComponent {
      * @return boolean/amt
      */
     public function convertFromTo($from_fcrn_id,$to_fcrn_id,$amt,  $date,$round = 6) {
-        $from_rate = $this->getCurrencyRate($from_fcrn_id, $date);
+        $source = $this->getSysCcmpCurrencySource($date);
+        $from_rate = $this->getCurrencyRate($from_fcrn_id, $date,$source);
        if ($from_rate === FALSE) {
             return FALSE;
         }        
-        $to_rate = $this->getCurrencyRate($to_fcrn_id, $date);
+        $to_rate = $this->getCurrencyRate($to_fcrn_id, $date,$source);
         if ($to_rate === FALSE) {
             return FALSE;
         }
-        return round($to_rate/$from_rate * $amt, $round);
-
+        
+        /**
+         * @todo add convert type to fcsr_courrency_source as definition
+         */
+        if ($source == 2){
+            return round($to_rate/$from_rate * $amt, $round);
+        }
+        return round($from_rate/$to_rate * $amt, $round);
         
     }
 
