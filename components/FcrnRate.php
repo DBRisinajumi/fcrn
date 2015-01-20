@@ -55,7 +55,7 @@ class FcrnRate extends CApplicationComponent {
             }
         }
         
-        throw new CHttpException(400, 'Please define for ' . $date . ' base currency!');
+        throw new CHttpException(400, 'Please define for ' . $date . ' base currency! SysCcmpId = ' . Yii::app()->sysCompany->getActiveCompany());
     }
 
     /**
@@ -76,7 +76,7 @@ class FcrnRate extends CApplicationComponent {
             }
         }
         
-        throw new CHttpException(400, 'Please define for ' . $date . ' base currency!');
+        throw new CHttpException(400, 'Please define for ' . $date . ' base currency! SysCcmpId = ' . Yii::app()->sysCompany->getActiveCompany());
     }
 
     public function getCurrencyCode2Id() {
