@@ -449,11 +449,19 @@ class FcrnRate extends CApplicationComponent {
      * @return boolean/amt
      */
     public function convertToBase($amt, $fcrn_id, $date,$round = 6) {
-        $rate = $this->getCurrencyRate($fcrn_id, $date);
+        $source = $this->getSysCcmpCurrencySource($date);
+        $rate = $this->getCurrencyRate($fcrn_id, $date,$source);
         if ($rate === FALSE) {
             return FALSE;
         }
-        return round($rate * $amt, $round);
+        
+        /**
+         * @todo add convert type to fcsr_courrency_source as definition
+         */
+        if ($source == 2){
+            return round($rate * $amt, $round);
+        }
+        return round($amt/$amt, $round);
 
         
     }
