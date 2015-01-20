@@ -461,7 +461,7 @@ class FcrnRate extends CApplicationComponent {
         if ($source == 2){
             return round($rate * $amt, $round);
         }
-        return round($amt/$amt, $round);
+        return round($amt/$rate, $round);
 
         
     }
