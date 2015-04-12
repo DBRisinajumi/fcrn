@@ -52,24 +52,38 @@ public function accessRules() {
     public function actionCreate()
     {
         $model = new FcrtCurrencyRate;
-        $model->scenario = $this->scenario;
-
-                $this->performAjaxValidation($model, 'fcrt-currency-rate-form');
-    
+        $model->scenario = 'load';
         if(isset($_POST['FcrtCurrencyRate'])) {
             $model->attributes = $_POST['FcrtCurrencyRate'];
-
-            try {
-                if($model->save()) {
-                    if (isset($_GET['returnUrl'])) {
-                        $this->redirect($_GET['returnUrl']);
-                    } else {
-                        $this->redirect(array('view','id'=>$model->fcrt_id));
-                    }
-                }
-            } catch (Exception $e) {
-                $model->addError('fcrt_id', $e->getMessage());
+            
+            //gat source base currency
+            $base_fcrn = Yii::app()->currency->getSourceBaseCurrency($model->fcrt_fcsr_id);
+            
+            $fcrn = FcrnRate::C_EUR;
+            if($base_fcrn == $fcrn){
+                $fcrn = FcrnRate::C_RUR;
             }
+
+            if(Yii::app()->currency->getCurrencyRate($fcrn, $model->fcrt_date,$model->fcrt_fcsr_id)){
+                $this->redirect([
+                    'admin',
+                    'FcrtCurrencyRate[fcrt_date]'=> $model->fcrt_date,
+                    'FcrtCurrencyRate[fcrt_fcsr_id]'=> $model->fcrt_fcsr_id,
+                    ]);
+            }else{
+                $model->addError('fcrt_date', Yii::app()->currency->sError);
+            }
+//            try {
+//                if($model->save()) {
+//                    if (isset($_GET['returnUrl'])) {
+//                        $this->redirect($_GET['returnUrl']);
+//                    } else {
+//                        $this->redirect(array('view','id'=>$model->fcrt_id));
+//                    }
+//                }
+//            } catch (Exception $e) {
+//                $model->addError('fcrt_id', $e->getMessage());
+//            }
         } elseif(isset($_GET['FcrtCurrencyRate'])) {
             $model->attributes = $_GET['FcrtCurrencyRate'];
         }

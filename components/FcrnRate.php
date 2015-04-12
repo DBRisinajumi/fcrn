@@ -4,8 +4,10 @@ class FcrnRate extends CApplicationComponent {
 
     const SOURCE_BANK_LV = 1;
     const SOURCE_BANK_LT = 2;
+    const SOURCE_BANK_RU = 3;
     const C_LVL = 3;
     const C_EUR = 1;
+    const C_RUR = 10;
 
     var $sError = FALSE;
     var $base = self::SOURCE_BANK_LV;
@@ -202,8 +204,15 @@ class FcrnRate extends CApplicationComponent {
      * @return boolean|float - currency rate
      */
     public function getCurrencyRate($id, $date, $source = FALSE) {
+        
+        
         $this->sError = FALSE;
 
+        if(empty($date)){
+            $this->sError = "Date can not be empty.";            
+            return FALSE;
+        }        
+        
         /**
          * validate input param
          */
@@ -212,10 +221,10 @@ class FcrnRate extends CApplicationComponent {
         }
         
         //same currency no convert
-        $base_fcrn_id = $this->getSysCcmpBaseCurrency($date);
-        if($id == $base_fcrn_id){
-            return 1;
-        }
+//        $base_fcrn_id = $this->getSysCcmpBaseCurrency($date);
+//        if($id == $base_fcrn_id){
+//            return 1;
+//        }
         
         if ($source) {
             if (!$this->isValidSourceId($source)) {
@@ -226,20 +235,17 @@ class FcrnRate extends CApplicationComponent {
         }
 
         $base = $this->getSourceBaseCurrency($source);
+        if($id == $base){
+            return 1;
+        }
         
-        if(empty($date)){
-            $this->sError = "Date can not be empty.";            
+        $sSql = "SELECT IF(DATEDIFF('" . $date . "',CURDATE())>1, 1, 0) in_future ";
+        $result = Yii::app()->db->createCommand($sSql)->queryScalar();
+        if ($result == 1) {
+            $this->sError = "Can not get currency rate, Date(" . $date . ") is in future.";
             return FALSE;
         }
-        
-        if ($date) {
-            $sSql = "SELECT IF(DATEDIFF('" . $date . "',CURDATE())>1, 1, 0) in_future ";
-            $result = Yii::app()->db->createCommand($sSql)->queryScalar();
-            if ($result == 1) {
-                $this->sError = "Can not get currency rate, Date(" . $date . ") is in future.";
-                return FALSE;
-            }
-        }
+
 
         $rate = $this->_getRateFromDb($source, $base, $id, $date);
 
@@ -253,17 +259,30 @@ class FcrnRate extends CApplicationComponent {
          * @todo add convert type to fcsr_courrency_source as definition 
          * and implement it in $this->convertFromTo
          */
-        if ($source == self::SOURCE_BANK_LV) {
-            $aRate = $this->_getRateFromBankLv($date);
-            if (!$aRate) {
-                return FALSE;
-            }
-        } elseif ($source == self::SOURCE_BANK_LT) {
-            $aRate = $this->_getRateFromBankLt($date);
-            if (!$aRate) {
-                return FALSE;
-            }
-        }
+        switch ($source) {
+            case self::SOURCE_BANK_LV:
+                $aRate = $this->_getRateFromBankLv($date);
+                if (!$aRate) {
+                    return FALSE;
+                }
+                break;
+            case self::SOURCE_BANK_LT:
+                $aRate = $this->_getRateFromBankLt($date);
+                if (!$aRate) {
+                    return FALSE;
+                }
+                break;
+            case self::SOURCE_BANK_RU:
+                $aRate = $this->_getRateFromBankRu($date);
+                if (!$aRate) {
+                    return FALSE;
+                }
+                break;
+            default:
+                $this->sError = "Undefined currency source: " .$source;
+                return false;
+                break;
+         }
 
         $this->_saveRate($aRate, $date, $source);
 
@@ -296,6 +315,43 @@ class FcrnRate extends CApplicationComponent {
         }
         return $aResRate;
     }
+    
+    /**
+     * nolasa valūtas kursus no bank.lv prasītajam datumam
+     * doc: http://www.cbr.ru/scripts/XML_daily.asp?date_req=10.04.2015
+     * @param char $nDate date in yyyy.mm.dd 
+     * @return boolean|int
+     */
+    public function _getRateFromBankRu($dDate) {
+        
+        $dDate = str_replace('-', '.', $dDate);
+        //convert from yyyy.mm.dd to dd.mm.yyyy
+        $dDate = preg_replace('#(\d\d\d\d)\.(\d\d)\.(\d\d)#', '$3.$2.$1', $dDate);
+        
+        $sUrl = "http://www.cbr.ru/scripts/XML_daily.asp?date_req=" . $dDate;
+
+        $cXML = file_get_contents($sUrl);
+        if (!$cXML) {
+            $this->sError = 'Neizdevās pieslēgties www.cbr.ru';
+            return false;
+        }
+
+        preg_match('#<ValCurs Date="(\d\d\.\d\d\.\d\d\d\d)"#', $cXML, $aDate);
+
+//        if($dDate != $aDate[1]){
+//            return false;
+//        }
+        preg_match_all("#<CharCode>(.*?)</CharCode>#", $cXML, $aIDs);
+        preg_match_all("#<Nominal>(.*?)</Nominal>#", $cXML, $aNominals);
+        preg_match_all("#<Value>(.*?)</Value>#", $cXML, $aRate);
+        
+        $aResRate = array();
+        foreach ($aIDs[1] as $k => $v) {
+            $aResRate[$v] = 1/str_replace(',','.',$aRate[1][$k])/$aNominals[1][$k];
+        }
+
+        return $aResRate;
+    }
 
     /**
      * changed to EUR
@@ -322,20 +378,6 @@ class FcrnRate extends CApplicationComponent {
         }
         
         $aXml = new SimpleXMLElement($cXML);
-
-//        preg_match_all("#<currency>(.*?)</currency>#", $cXML, $aIDs);
-//        preg_match_all("#<quantity>(.*?)</quantity>#", $cXML, $aUnits);
-//        preg_match_all("#<rate>(.*?)</rate>#", $cXML, $aRate);
-//
-//        foreach ($aIDs[1] as $k => $v) {
-//            if ($aUnits[1][$k] > 1)
-//                $nCurrencyRate = $aRate[1][$k] / $aUnits[1][$k];
-//            else
-//                $nCurrencyRate = $aRate[1][$k];
-//
-//            $aResRate[$v] = $nCurrencyRate;
-//        }
-        
         
         foreach($aXml->FxRate as $k => $v)    {
             
@@ -365,6 +407,7 @@ class FcrnRate extends CApplicationComponent {
         foreach ($aRate as $fcrn_code => $rate) {
             $id = $this->getCurrencyIdByCode($fcrn_code);
             if (!$id) {
+                $this->sError = false;
                 /**
                  * valūta nav starp vajadzīgajām valūtam
                  */
