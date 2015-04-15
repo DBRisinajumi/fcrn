@@ -5,6 +5,7 @@ class FcrnRate extends CApplicationComponent {
     const SOURCE_BANK_LV = 1;
     const SOURCE_BANK_LT = 2;
     const SOURCE_BANK_RU = 3;
+    const SOURCE_BANK_LT_ACC_EUR = 4;
     const C_LVL = 3;
     const C_EUR = 1;
     const C_RUR = 10;
@@ -278,6 +279,12 @@ class FcrnRate extends CApplicationComponent {
                     return FALSE;
                 }
                 break;
+            case self::SOURCE_BANK_LT_ACC_EUR:
+                $aRate = $this->_getRateFromBankLtAccEur($date);
+                if (!$aRate) {
+                    return FALSE;
+                }
+                break;
             default:
                 $this->sError = "Undefined currency source: " .$source;
                 return false;
@@ -385,6 +392,40 @@ class FcrnRate extends CApplicationComponent {
              $aResRate[$currency] = (float) $v->CcyAmt[0]->Amt / (float) $v->CcyAmt[1]->Amt;   
         }
 
+        return $aResRate;
+    }
+    
+    /**
+     * changed to EUR
+     * doc :http://www.lb.lt/webservices/FxRates/FxRates.asmx?op=getFxRates
+     * 
+     * get EUR rate special for accountig from Bank Lituania in CSV format
+     * link example: http://www.lb.lt/fxrates_csv.lb?tp=LT&rs=&dte=2015-04-13&ln=en
+     * @param char $nDate date in yyyy.mm.dd
+     * @return boolean|int
+     */
+    public function _getRateFromBankLtAccEur($nDate) {
+
+        $nDate = str_replace('.','-', $nDate);
+        
+        $sUrl = "http://www.lb.lt/fxrates_csv.lb?tp=LT&rs=&ln=en&dte=" . $nDate;
+        
+        $csvData = file_get_contents($sUrl);
+        if (!$csvData) {
+            $this->sError = 'Neizdevās pieslēgties bl.lt';
+            return false;
+        }
+        
+        $lines = explode(PHP_EOL, $csvData);
+        
+        $aResRate = array();
+        
+        foreach ($lines as $line) {
+            if(!empty($line)){
+                list($name,$code,$rate,$date) = str_getcsv($line);
+                $aResRate[$code] = (float) $rate;   
+            }
+        }
         return $aResRate;
     }
 
@@ -517,12 +558,18 @@ class FcrnRate extends CApplicationComponent {
      * @param date $date
      * @return boolean/amt
      */
-    public function convertFromTo($from_fcrn_id,$to_fcrn_id,$amt,  $date,$round = 6) {
-        $source = $this->getSysCcmpCurrencySource($date);
+    public function convertFromTo($from_fcrn_id,$to_fcrn_id,$amt,  $date,$round = 6, $source = false) {
+        
+        //default source - syscompany source
+        if(!$source){
+            $source = $this->getSysCcmpCurrencySource($date);
+        }
+        
         $from_rate = $this->getCurrencyRate($from_fcrn_id, $date,$source);
-       if ($from_rate === FALSE) {
+        if ($from_rate === FALSE) {
             return FALSE;
         }        
+        
         $to_rate = $this->getCurrencyRate($to_fcrn_id, $date,$source);
         if ($to_rate === FALSE) {
             return FALSE;
@@ -531,7 +578,7 @@ class FcrnRate extends CApplicationComponent {
         /**
          * @todo add convert type to fcsr_courrency_source as definition
          */
-        if ($source == 2){
+        if ($source == self::SOURCE_BANK_LT){
             return round($to_rate/$from_rate * $amt, $round);
         }
         return round($from_rate/$to_rate * $amt, $round);
