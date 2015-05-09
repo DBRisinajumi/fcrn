@@ -629,7 +629,7 @@ class FcrnRate extends CApplicationComponent {
                     fcrt_fcsr_id=:source 
                     AND fcrt_base_fcrn_id=:base
                     and fcrt_date=:date', array(
-                    ':source' => $this->getSysCcmpCurrencySource(),
+                    ':source' => $this->getSysCcmpCurrencySource($date),
                     ':base' => $this->getSysCcmpBaseCurrency($date),
                     ':date' => $date
                 ))
