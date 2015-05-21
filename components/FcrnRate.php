@@ -341,7 +341,7 @@ class FcrnRate extends CApplicationComponent {
         $context = stream_context_create(['http' => ['max_redirects' => 0, 'ignore_errors' => true]]);
         $cXML = file_get_contents($sUrl, false, $context);        
         if (!$cXML) {
-            $this->sError = 'Neizdevās pieslēgties www.cbr.ru';
+            $this->sError = 'Neizdevās pieslēgties www.cbr.ru. URL:' . $sUrl;
             return false;
         }
 
