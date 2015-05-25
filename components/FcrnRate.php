@@ -580,14 +580,13 @@ class FcrnRate extends CApplicationComponent {
         /**
          * @todo add convert type to fcsr_courrency_source as definition
          */
-        if ($source == self::SOURCE_BANK_LT){
-            return round($to_rate/$from_rate * $amt, $round);
-        } elseif ($source == self::SOURCE_BANK_RU){
+        
+        if ($source == self::SOURCE_BANK_RU){
             return round($to_rate*$from_rate * $amt, $round);
+        } else {
+             return round($to_rate/$from_rate * $amt, $round);
         }
-        
-        return round($from_rate/$to_rate * $amt, $round);
-        
+            
     }
 
     /**
