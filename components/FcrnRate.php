@@ -582,7 +582,10 @@ class FcrnRate extends CApplicationComponent {
          */
         if ($source == self::SOURCE_BANK_LT){
             return round($to_rate/$from_rate * $amt, $round);
+        } elseif ($source == self::SOURCE_BANK_RU){
+            return round($to_rate*$from_rate * $amt, $round);
         }
+        
         return round($from_rate/$to_rate * $amt, $round);
         
     }
