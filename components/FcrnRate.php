@@ -375,9 +375,13 @@ class FcrnRate extends CApplicationComponent {
         
         $aResRate = array();
         foreach ($aIDs[1] as $k => $v) {
-            $aResRate[$v] = 1/str_replace(',','.',$aRate[1][$k])/$aNominals[1][$k];
+            
+            // we need only EUR rate, others do not make sense
+            if ($v == 'EUR'){
+                $aResRate['RUB'] = str_replace(',','.',$aRate[1][$k]);
+            }     
         }
-        Yii::log("Currency array: ".json_encode($aResRate). 'info');
+        
         return $aResRate;
     }
 
