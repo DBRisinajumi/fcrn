@@ -310,6 +310,7 @@ class FcrnRate extends CApplicationComponent {
 
         $cXML = file_get_contents($sUrl);
         if (!$cXML) {
+            Yii::log("Failed get XML from www.bank.lv: ".$sUrl, 'error');
             $this->sError = 'Neizdevās pieslēgties bank.lv';
             return false;
         }
@@ -340,10 +341,10 @@ class FcrnRate extends CApplicationComponent {
         //$cXML = file_get_contents($sUrl);
         $context = stream_context_create(['http' => ['max_redirects' => 0, 'ignore_errors' => true]]);
         $cXML = @file_get_contents($sUrl, false, $context); 
-        Yii::log("Get XML from cbr.ru");
+        Yii::log("Get XML from cbr.ru: ".$sUrl);
         if (!$cXML) {
-            Yii::log("Failed get XML from cbr.ru");
-            $this->sError = 'Neizdevās pieslēgties www.cbr.ru. URL:' . $sUrl;
+            Yii::log("Failed get XML from cbr.ru: ".$sUrl, 'error');
+            $this->sError = 'Failed to connect www.cbr.ru. URL:' . $sUrl;
             return false;
         }
 
@@ -360,7 +361,7 @@ class FcrnRate extends CApplicationComponent {
         foreach ($aIDs[1] as $k => $v) {
             $aResRate[$v] = 1/str_replace(',','.',$aRate[1][$k])/$aNominals[1][$k];
         }
-        Yii::log("Currency array: ".json_encode($aResRate));
+        Yii::log("Currency array: ".json_encode($aResRate). 'info');
         return $aResRate;
     }
 
@@ -384,6 +385,7 @@ class FcrnRate extends CApplicationComponent {
         
         $cXML = file_get_contents($sUrl);
         if (!$cXML) {
+            Yii::log("Failed get XML from lb.lt: ".$sUrl, 'error');
             $this->sError = 'Neizdevās pieslēgties bl.ll';
             return false;
         }
