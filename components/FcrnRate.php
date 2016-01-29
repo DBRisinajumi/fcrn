@@ -308,7 +308,14 @@ class FcrnRate extends CApplicationComponent {
         $nDate = preg_replace('#[^0-9]*#', '', $nDate);
         $sUrl = "http://www.bank.lv/vk/ecb.xml?date=" . $nDate;
 
-        $cXML = file_get_contents($sUrl);
+        $resource = curl_init();
+
+        curl_setopt($resource, CURLOPT_URL, $sUrl);
+        curl_setopt($resource, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
+        $cXML = curl_exec($resource);
+        curl_close($resource);   
+        
         if (!$cXML) {
             Yii::log("Failed get XML from www.bank.lv: ".$sUrl, 'error');
             $this->sError = 'Neizdevās pieslēgties bank.lv';
@@ -392,7 +399,14 @@ class FcrnRate extends CApplicationComponent {
         
         $sUrl = "http://webservices.lb.lt/FxRates/FxRates.asmx/getFxRates?tp=EU&dt=" . $nDate;
         
-        $cXML = file_get_contents($sUrl);
+        $resource = curl_init();
+
+        curl_setopt($resource, CURLOPT_URL, $sUrl);
+        curl_setopt($resource, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
+        $cXML = curl_exec($resource);
+        curl_close($resource);   
+        
         if (!$cXML) {
             Yii::log("Failed get XML from lb.lt: ".$sUrl, 'error');
             $this->sError = 'Neizdevās pieslēgties bl.ll';
