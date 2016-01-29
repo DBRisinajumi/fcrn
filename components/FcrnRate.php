@@ -339,8 +339,10 @@ class FcrnRate extends CApplicationComponent {
 
         //$cXML = file_get_contents($sUrl);
         $context = stream_context_create(['http' => ['max_redirects' => 0, 'ignore_errors' => true]]);
-        $cXML = @file_get_contents($sUrl, false, $context);        
+        $cXML = @file_get_contents($sUrl, false, $context); 
+        Yii::log("Get XML from cbr.ru");
         if (!$cXML) {
+            Yii::log("Failed get XML from cbr.ru");
             $this->sError = 'Neizdevās pieslēgties www.cbr.ru. URL:' . $sUrl;
             return false;
         }
@@ -358,7 +360,7 @@ class FcrnRate extends CApplicationComponent {
         foreach ($aIDs[1] as $k => $v) {
             $aResRate[$v] = 1/str_replace(',','.',$aRate[1][$k])/$aNominals[1][$k];
         }
-
+        Yii::log("Currency array: ".json_encode($aResRate));
         return $aResRate;
     }
 
@@ -490,6 +492,7 @@ class FcrnRate extends CApplicationComponent {
                 ':fcrt_rate' => $rate,
             );
 
+            Yii::log("Save rates to db: ".  json_encode($parameters));
             Yii::app()->db->createCommand($sql)->execute($parameters);
         }
         return true;
@@ -562,6 +565,8 @@ class FcrnRate extends CApplicationComponent {
      */
     public function convertFromTo($from_fcrn_id,$to_fcrn_id,$amt,  $date,$round = 6, $source = false) {
         
+        
+        Yii::log("Converting from ".$this->convId2Code($from_fcrn_id)." to ".$this->convId2Code($to_fcrn_id));
         //default source - syscompany source
         if(!$source){
             $source = $this->getSysCcmpCurrencySource($date);
