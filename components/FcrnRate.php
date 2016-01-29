@@ -339,8 +339,17 @@ class FcrnRate extends CApplicationComponent {
         $sUrl = "http://www.cbr.ru/scripts/XML_daily.asp?date_req=" . $dDate;
 
         //$cXML = file_get_contents($sUrl);
-        $context = stream_context_create(['http' => ['max_redirects' =>20,'ignore_errors' => true]]);
-        $cXML = @file_get_contents($sUrl, false, $context); 
+      //$context = stream_context_create(['http' => ['max_redirects' =>20,'ignore_errors' => true]]);
+      //$cXML = @file_get_contents($sUrl, false, $context); 
+        
+        $resource = curl_init();
+
+        curl_setopt($resource, CURLOPT_URL, $sUrl);
+        curl_setopt($resource, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($resource, CURLOPT_FOLLOWLOCATION, true);
+        $cXML = curl_exec($resource);
+        curl_close($resource);      
+                 
         Yii::log("Get XML from cbr.ru: ".$sUrl);
         if (!$cXML) {
             Yii::log("Failed get XML from cbr.ru: ".$sUrl, 'error');
